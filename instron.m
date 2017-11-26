@@ -2,8 +2,8 @@ clear all
 close all
 % User Input start
 date = '100617';
-LoadExtension = 'no';
-StressStrain = 'no';
+LoadExtension = 'no';  % need to be lowercase
+StressStrain = 'yes';  % need to be lowercase
 % User Input end
 set(0, 'DefaultAxesFontSize', 14);
 d = dir(sprintf('./%s/*.csv', date));
@@ -13,6 +13,8 @@ ColorOdrCustom = [1 0 0; 0 0 1; 0 0.5 0; 0 0 0; 1 0 1; 1 0.69 0.39;...
 
 legendtext = [];
 modulus = [];
+YeildStress = [];
+YieldStrain = [];
 
 if strcmp(LoadExtension, 'yes');
     fg1 = figure;
@@ -58,29 +60,33 @@ for k = 1:len
         'linewidth', 3)
     pause
     p3 = getCursorInfo(cursor);
-    line([p3.Position(1) p3.Position(1)],[0 4], 'linestyle', '--', ...
+    line([p3.Position(1) p3.Position(1)],[0 7], 'linestyle', '--', ...
         'color', 'k')
     pause
     p4 = getCursorInfo(cursor);
-    line([p4.Position(1) p4.Position(1)],[0 4], 'linestyle', '--', ...
+    line([p4.Position(1) p4.Position(1)],[0 7], 'linestyle', '--', ...
         'color', 'k')
+    datacursormode off
     
     [fit] = fitting(p1.Position(1), p2.Position(1), strain, stress);
     ind_low = find(strain == p3.Position(1));
     ind_up = find(strain == p4.Position(1));
     [val] = max(stress(ind_low:ind_up));
     ind = find(stress == val)
-    YieldStress = val;
-    YieldStrain = strain(ind);
-    legend(sprintf('run%d', k), sprintf('linear fit: y = %f*x %f', ...
-        fit(1), fit(2)), sprintf('yeildStress = %f', YieldStress), ...
-        sprintf('yeildStrain = %f', YieldStrain), 'Location', 'southeast');
+    YStress = val;
+    YStrain = strain(ind);
+    str = {sprintf('run%d', k), sprintf('linear fit: y = %f*x %f', ...
+        fit(1), fit(2)), sprintf('YeildStress = %f', YStress), ...
+        sprintf('YeildStrain = %f', YStrain)};
+    dim = [0.45 0.6 0.3 0.3];
+    annotation('textbox',dim,'String',str,'FitBoxToText','on');
     set(gca, 'box', 'off', 'XMinorTick', 'on', 'YMinorTick', 'on');
     xlabel(gca, 'Compressive strain');
     ylabel(gca,'Compressive stress (MPa)');
     print(sprintf('./%s/run%d', date, k),'-depsc')
     modulus = [modulus; fit(1)];
-    hold off
+    YeildStress = [YeildStress; YStress];
+    YieldStrain = [YieldStrain; YStrain];
     legendtext = [legendtext; sprintf('run%d', k)];
     
     if strcmp(LoadExtension, 'yes');
