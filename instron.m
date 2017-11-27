@@ -1,9 +1,9 @@
 clear all
 close all
 % User Input start
-date = '100617';
+date = '101317';
 LoadExtension = 'no';  % need to be lowercase
-StressStrain = 'yes';  % need to be lowercase
+StressStrain = 'no';  % need to be lowercase
 % User Input end
 set(0, 'DefaultAxesFontSize', 14);
 d = dir(sprintf('./%s/*.csv', date));
@@ -13,7 +13,7 @@ ColorOdrCustom = [1 0 0; 0 0 1; 0 0.5 0; 0 0 0; 1 0 1; 1 0.69 0.39;...
 
 legendtext = [];
 modulus = [];
-YeildStress = [];
+YieldStress = [];
 YieldStrain = [];
 
 if strcmp(LoadExtension, 'yes');
@@ -28,7 +28,7 @@ if strcmp(StressStrain, 'yes');
     ax2 = gca;
 end
 
-for k = 1:len
+for k = 1:len/2
     filename = sprintf('./%s/Specimen_RawData_%d.csv', date, k);
     fid = fopen(filename, 'rt');
     Headerline = 7;  % Lines to skip
@@ -85,7 +85,7 @@ for k = 1:len
     ylabel(gca,'Compressive stress (MPa)');
     print(sprintf('./%s/run%d', date, k),'-depsc')
     modulus = [modulus; fit(1)];
-    YeildStress = [YeildStress; YStress];
+    YieldStress = [YieldStress; YStress];
     YieldStrain = [YieldStrain; YStrain];
     legendtext = [legendtext; sprintf('run%d', k)];
     
@@ -113,7 +113,4 @@ for k = 1:len
     
 end
 
-
-%str = [SampleName, '= modulus;'];
-%eval(str)  % change variable name
-%save('AllSamples',SampleName, '-append')
+save(sprintf('%s', date), 'modulus', 'YieldStress', 'YieldStrain')
